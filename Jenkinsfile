@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "levinrobert/finance-website:latest"
+        IMAGE_NAME = "finance-website:latest"
     }
 
     stages {
@@ -16,7 +16,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
+                sh 'docker build -t finance-website:latest .'
+            }
+        }
+
+        stage('Run test') {
+            steps {
+                sh 'docker run -d finance-website'
             }
         }
 
@@ -34,7 +40,7 @@ pipeline {
 
         stage('Push Image') {
             steps {
-                sh 'docker push $IMAGE_NAME'
+                sh 'docker push levin16robert/finance-website'
             }
         }
     }
