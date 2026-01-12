@@ -40,7 +40,7 @@ pipeline {
 
         stage('Push Image') {
             steps {
-                sh 'docker push levin16robert/finance-website'
+                sh 'docker push finance-website'
             }
         }
     }
