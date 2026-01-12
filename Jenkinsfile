@@ -2,31 +2,40 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "finance-website:latest"
+        IMAGE_NAME = "levinrobert/finance-website:latest"
     }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/LevinRobert/finance-website.git'
+                git branch: 'main',
+                    url: 'https://github.com/LevinRobert/finance-website.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t finance-website:latest .'
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
-        stage('Run Tests') {
+        stage('Login to DockerHub') {
             steps {
-                sh 'docker run -d finance-website'
-              
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
             }
         }
 
+        stage('Push Image') {
+            steps {
+                sh 'docker push $IMAGE_NAME'
+            }
+        }
     }
-
-    
-
+}
