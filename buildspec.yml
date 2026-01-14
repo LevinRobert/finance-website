@@ -6,15 +6,15 @@ env:
     ECR_REPO: finance-codebuild
     ECS_CLUSTER: finance-cluster
     ECS_SERVICE: finance-td-service
-    TASK_DEFINITION: finance-td:2
 
 phases:
   pre_build:
-  commands:
-    - echo Logging in to Amazon ECR
-    - aws ecr get-login-password --region $AWS_DEFAULT_REGION |
-      docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-
+    commands:
+      - echo Logging in to Amazon ECR
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION |
+        docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
 
   build:
     commands:
@@ -29,6 +29,6 @@ phases:
       - docker push $IMAGE_URI
       - echo Updating ECS service
       - aws ecs update-service \
-        --cluster $ECS_CLUSTER \
-        --service $ECS_SERVICE \
-        --force-new-deployment
+          --cluster $ECS_CLUSTER \
+          --service $ECS_SERVICE \
+          --force-new-deployment
