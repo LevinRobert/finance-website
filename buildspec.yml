@@ -8,26 +8,43 @@ env:
     ECS_SERVICE: finance-td-service
 
 phases:
+
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR
+      - echo "Logging in to Amazon ECR"
+      - echo "Region: $AWS_DEFAULT_REGION"
+      - echo "Account: $ACCOUNT_ID"
+
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION |
-        docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+        docker login --username AWS --password-stdin \
+        $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+
+      - echo "Creating image tag from commit hash"
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-      - echo "ACCOUNT_ID=$ACCOUNT_ID"
-      - echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION"
+      - echo "Image URI: $IMAGE_URI"
 
   build:
     commands:
-      - echo Building Docker image
+      - echo "Building Docker image"
+
       - docker build -t $IMAGE_URI .
-      - echo Running tests
-      - docker run $IMAGE_URI npm test
+
+      - echo "Running application tests"
+      
+
+      - docker run --rm $IMAGE_URI npm test
 
   post_build:
     commands:
-      - echo Pushing image to ECR
+      - echo "Pushing Docker image to Amazon ECR"
+
       - docker push $IMAGE_URI
-      - echo Updating ECS service
-      - aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+      - echo "Deploying new image to ECS service"
+      - echo "Cluster: $ECS_CLUSTER"
+      - echo "Service: $ECS_SERVICE"
+
+      - aws ecs update-service \
+          --cluster $ECS_CLUSTER \
+          --service $ECS_SERVICE \
+          --force-new-deployment
