@@ -26,8 +26,12 @@ phases:
       - docker run -d $IMAGE_URI npm test
 
   post_build:
-    commands:
-      - echo Pushing image to ECR
-      - docker push $IMAGE_URI
-      - echo Updating ECS service
-      - aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+  commands:
+    - echo "Pushing Docker image to ECR"
+    - docker push $IMAGE_URI
+    - echo "Tagging image as latest for ECS"
+    - docker tag $IMAGE_URI $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPO:latest
+    - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPO:latest
+    - echo "Updating ECS service"
+    - aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+
