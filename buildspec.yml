@@ -15,6 +15,8 @@ phases:
         docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+      - echo "ACCOUNT_ID=$ACCOUNT_ID"
+      - echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION"
 
   build:
     commands:
