@@ -27,10 +27,10 @@ phases:
 
   post_build:
     commands:
-      - echo Pushing image to ECR
-      - docker push $IMAGE_URI
-      - echo Updating ECS service
-      - aws ecs update-service \
-          --cluster $ECS_CLUSTER \
-          --service $ECS_SERVICE \
-          --force-new-deployment
+      post_build:
+  commands:
+    - echo Pushing image to ECR
+    - docker push $IMAGE_URI
+    - echo Updating ECS service
+    - aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+
