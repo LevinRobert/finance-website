@@ -23,7 +23,7 @@ phases:
       - echo Building Docker image
       - docker build -t $IMAGE_URI .
       - echo Running tests
-      - docker run $IMAGE_URI npm test
+      - docker run -d $IMAGE_URI npm test
 
   post_build:
     commands:
