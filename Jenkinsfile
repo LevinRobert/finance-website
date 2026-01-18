@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "levinrobert/finance-website:latest"
-        TARGET_VM = "ec2-user@your-vm-ip"  // replace with your VM username and IP
+        TARGET_VM = "ec2-user@15.206.187.198"
     }
 
     stages {
