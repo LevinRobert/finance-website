@@ -42,7 +42,7 @@ pipeline {
         stage('Deploy on Target VM') {
             steps {
                 withCredentials([sshUserPrivateKey(
-                    credentialsId: 'vm-ssh-key',
+                    credentialsId: 'target-vm-ssh',
                     keyFileVariable: 'SSH_KEY',
                     usernameVariable: 'SSH_USER'
                 )]) {
