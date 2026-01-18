@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "levin16robert/finance-website:latest"
+        IMAGE_NAME = "levinrobert/finance-website:latest"
+        TARGET_VM = "ec2-user@your-vm-ip"  // replace with your VM username and IP
     }
 
     stages {
@@ -26,7 +27,7 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Image') {
             steps {
                 sh 'docker build -t $IMAGE_NAME .'
             }
@@ -35,6 +36,26 @@ pipeline {
         stage('Push Image') {
             steps {
                 sh 'docker push $IMAGE_NAME'
+            }
+        }
+
+        stage('Deploy on Target VM') {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'target-vm-ssh',  // Jenkins SSH key credential for VM
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+                    sh """
+                        ssh -i $SSH_KEY -o StrictHostKeyChecking=no $SSH_USER@$TARGET_VM '
+                            docker login -u $DOCKER_USER -p $DOCKER_PASS &&
+                            docker pull $IMAGE_NAME &&
+                            docker stop finance-website || true &&
+                            docker rm finance-website || true &&
+                            docker run -d --name finance-website -p 3000:3000 $IMAGE_NAME
+                        '
+                    """
+                }
             }
         }
     }
