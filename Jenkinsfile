@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "levinrobert/finance-website:latest"
+        IMAGE_NAME = "levin16robert/finance-website:latest"
         TARGET_VM = "ec2-user@15.206.187.198"
     }
 
