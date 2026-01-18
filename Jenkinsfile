@@ -52,7 +52,7 @@ pipeline {
                             docker pull $IMAGE_NAME &&
                             docker stop finance-website || true &&
                             docker rm finance-website || true &&
-                            docker run -d --name finance-website -p 3000:3000 $IMAGE_NAME
+                            docker run -d --name finance-website -p 3000:6111 $IMAGE_NAME
                         '
                     """
                 }
