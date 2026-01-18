@@ -42,19 +42,18 @@ pipeline {
         stage('Deploy on Target VM') {
             steps {
                 withCredentials([sshUserPrivateKey(
-                    credentialsId: 'target-vm-ssh',  // Jenkins SSH key credential for VM
+                    credentialsId: 'vm-ssh-key',
                     keyFileVariable: 'SSH_KEY',
                     usernameVariable: 'SSH_USER'
                 )]) {
-                    sh """
-                        ssh -i $SSH_KEY -o StrictHostKeyChecking=no $SSH_USER@$TARGET_VM '
-                            docker login -u $DOCKER_USER -p $DOCKER_PASS &&
-                            docker pull $IMAGE_NAME &&
-                            docker stop finance-website || true &&
-                            docker rm finance-website || true &&
-                            docker run -d --name finance-website -p 3000:6111 $IMAGE_NAME
-                        '
-                    """
+                    sh '''
+                      ssh -i $SSH_KEY -o StrictHostKeyChecking=no $TARGET_VM "
+                        docker pull ${IMAGE_NAME} &&
+                        docker stop finance || true &&
+                        docker rm finance || true &&
+                        docker run -d --name finance -p 3000:6111 ${IMAGE_NAME}
+                      "
+                    '''
                 }
             }
         }
