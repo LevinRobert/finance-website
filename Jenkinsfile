@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         IMAGE_NAME = "levin16robert/finance-website:latest"
-        TARGET_VM = "ec2-user@15.206.187.198"
     }
 
     stages {
@@ -27,7 +26,7 @@ pipeline {
             }
         }
 
-        stage('Build Image') {
+        stage('Build Docker Image') {
             steps {
                 sh 'docker build -t $IMAGE_NAME .'
             }
@@ -36,25 +35,6 @@ pipeline {
         stage('Push Image') {
             steps {
                 sh 'docker push $IMAGE_NAME'
-            }
-        }
-
-        stage('Deploy on Target VM') {
-            steps {
-                withCredentials([sshUserPrivateKey(
-                    credentialsId: 'target-vm-ssh',
-                    keyFileVariable: 'SSH_KEY',
-                    usernameVariable: 'SSH_USER'
-                )]) {
-                    sh '''
-                      ssh -i $SSH_KEY -o StrictHostKeyChecking=no $TARGET_VM "
-                        docker pull ${IMAGE_NAME} &&
-                        docker stop finance || true &&
-                        docker rm finance || true &&
-                        docker run -d --name finance -p 3000:6111 ${IMAGE_NAME}
-                      "
-                    '''
-                }
             }
         }
     }
